@@ -1,0 +1,10 @@
+debug/main.o
+debug/numblock.o
+debug/widget.o
+debug/framewgt.o
+debug/titlebar.o
+debug/qrc_titlebar_res.o
+debug/moc_numblock.o
+debug/moc_widget.o
+debug/moc_framewgt.o
+debug/moc_titlebar.o
