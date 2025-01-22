@@ -8,7 +8,10 @@ NumBlock::NumBlock(QWidget *parent)
     , theme(0)
 {
     ui->setupUi(this);
-    setFixedSize(100, 100);
+    setFixedSize(80, 80);
+    ui->number->setStyleSheet("color:rgb(255,255,255);");
+    ui->shadow->setStyleSheet("color:rgb(0, 178, 178);");
+    ui->number->raise();
 }
 
 NumBlock::~NumBlock()
@@ -18,35 +21,30 @@ NumBlock::~NumBlock()
 
 void NumBlock::setNum(const int n)
 {
-    if (n == 0){
-
-    }
-    else{
-        num = n;
-        ui->number->setText(QString::number(num));
-    }
+    num = n;
+    QString text = QString::number(num);
+    ui->number->setText(text);
+    ui->shadow->setText(text);
     update();
 }
 
-void NumBlock::setTheme(const int t)
+void NumBlock::setTheme(const QColor grid, const QColor shadow)
 {
-    if (t < 6)
-        theme = t;
-    switch (t) {
-    case 0:
-        break;
-    case 1:
-        break;
-    case 2:
-        break;
-    case 3:
-        break;
-    case 4:
-        break;
-    case 5:
-        break;
-    default:
-        break;
-    }
+    gridColor = grid;
+    shadowColor = shadow;
     update();
+}
+
+void NumBlock::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.setPen(Qt::NoPen);
+
+    QBrush brush(shadowColor);
+    painter.setBrush(brush);
+    painter.drawRect(4, 4, 76, 76);
+
+    brush.setColor(gridColor);
+    painter.setBrush(brush);
+    painter.drawRect(0, 0, 76, 76);
 }

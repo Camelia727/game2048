@@ -2,9 +2,14 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QTimer>
 #include <QPainter>
+#include <QKeyEvent>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QRandomGenerator>
+#include <QPropertyAnimation>
+#include "numblock.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,6 +24,8 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
+    QColor getGridColor() const {return gridColor;}
+    QColor getGridshadowColor() const {return gridshadowColor;}
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -27,6 +34,8 @@ protected:
 private:
     Ui::Widget *ui;
 
+    bool moving;
+    bool pausing;
     int curScore;
     int topScore;
     QMediaPlayer* player;
@@ -36,7 +45,23 @@ private:
     QColor mainbtnColor;
     QColor gridColor;
     QColor gridbackColor;
+    QColor gridblockColor;
     QColor backshadowColor;
     QColor mainshadowColor;
+    QColor gridshadowColor;
+    QList<QList<NumBlock*>> grids;
+
+    void moveGrid(int x1, int y1, int x2, int y2);
+    void moveUp();
+    void moveDown();
+    void moveRight();
+    void moveLeft();
+    void createGrid();
+    bool isEnd() const;
+    void gamePause();
+    void gameEnd();
+
+public slots:
+
 };
 #endif // WIDGET_H

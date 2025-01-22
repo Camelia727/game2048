@@ -16,15 +16,38 @@
   <widget class="QLabel" name="number">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>60</width>
-     <height>60</height>
+     <x>0</x>
+     <y>0</y>
+     <width>76</width>
+     <height>76</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>15</pointsize>
+     <pointsize>25</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="shadow">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>2</y>
+     <width>76</width>
+     <height>76</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>25</pointsize>
+     <bold>true</bold>
     </font>
    </property>
    <property name="text">
