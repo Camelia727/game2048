@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/bgms">
+        <file>bgm/Alone.mp3</file>
+        <file>bgm/Savage Love.mp3</file>
+        <file>bgm/Shelter.mp3</file>
+        <file>bgm/Classroom at dusk.mp3</file>
+        <file>bgm/autumn.mp3</file>
+        <file>bgm/April 11th.mp3</file>
+        <file>bgm/Night town.mp3</file>
+    </qresource>
+</RCC>

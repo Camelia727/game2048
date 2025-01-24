@@ -16,7 +16,7 @@ public:
     explicit NumBlock(QWidget *parent = nullptr);
     ~NumBlock();
     void setNum(const int n);
-    void setTheme(const QColor grid, const QColor shadow);
+    void setTheme(const QColor shadow);
     int getNum() const {return num;}
     int getTheme() const {return theme;}
 
@@ -29,6 +29,7 @@ private:
     int theme;
     QColor gridColor;
     QColor shadowColor;
+    QList<QColor> colors;
 };
 
 #endif // NUMBLOCK_H

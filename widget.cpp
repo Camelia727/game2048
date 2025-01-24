@@ -4,11 +4,12 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
+    , moving(false)
     , curScore(0)
     , topScore(0)
-    , moving(false)
     , player(new QMediaPlayer(this))
     , audio(new QAudioOutput(this))
+    , durationTimer(new QTimer(this))
 {
     ui->setupUi(this);
     setFixedSize(500,750);
@@ -21,8 +22,22 @@ Widget::Widget(QWidget *parent)
     backshadowColor.setRgb(0, 101, 108);
     mainshadowColor.setRgb(10, 171, 182);
     gridshadowColor.setRgb(5, 132, 137);
+    durationTimer->setInterval(200);
 
+    bgms = {QUrl("qrc:/bgms/bgm/Alone.mp3"),
+            QUrl("qrc:/bgms/bgm/April 11th.mp3"),
+            QUrl("qrc:/bgms/bgm/autumn.mp3"),
+            QUrl("qrc:/bgms/bgm/Classroom at dusk.mp3"),
+            QUrl("qrc:/bgms/bgm/Night town.mp3"),
+            QUrl("qrc:/bgms/bgm/Savage Love.mp3"),
+            QUrl("qrc:/bgms/bgm/Shelter.mp3")
+    };
     grids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
+    numbers = QList<QList<int>>(4, QList<int>(4, 0));
+
+    playBgm();
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, &Widget::playBgm);
+    connect(durationTimer, &QTimer::timeout, this, &Widget::acceptMove);
     createGrid();
 }
 
@@ -153,6 +168,22 @@ void Widget::gameEnd()
     qDebug() << "gameEnd";
 }
 
+void Widget::playBgm()
+{
+    qDebug() << "playbgm";
+    int bgm_sum = bgms.size();
+    int index = QRandomGenerator::global()->bounded(bgm_sum);
+    player->setSource(bgms[index]);
+    player->setAudioOutput(audio);
+    audio->setVolume(30);
+    player->play();
+}
+
+void Widget::acceptMove()
+{
+
+}
+
 void Widget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
@@ -196,10 +227,6 @@ void Widget::paintEvent(QPaintEvent *event)
 
 void Widget::keyPressEvent(QKeyEvent *event)
 {
-    if (moving){
-        event->ignore();
-        return;
-    }
     switch (event->key()){
     case Qt::Key_Up:
         moving = true;
@@ -249,7 +276,7 @@ void Widget::moveGrid(int x1, int y1, int x2, int y2)
             grids[x1][y1] = nullptr;
         }
         else if (grids[x1][y1]->getNum() == grids[x2][y2]->getNum()) {
-            grids[x2][y2]->setNum(2*grids[x2][y2]->getNum());
+            grids[x2][y2]->setNum(grids[x2][y2]->getNum()+1);
             grids[x1][y1]->hide();
             grids[x1][y1] = nullptr;
         }
@@ -266,11 +293,13 @@ void Widget::createGrid()
         int y = pos % 4;
         if (grids[x][y] == nullptr) {
             qDebug() << "x:" << x << "y:" << y << "\n*****";
+            int num = QRandomGenerator::global()->bounded(10) < 9 ? 1 : 2;
             NumBlock* newBlock = new NumBlock(this);
-            newBlock->setNum(2);
-            newBlock->setTheme(gridblockColor, gridshadowColor);
+            newBlock->setNum(num);
+            newBlock->setTheme(gridshadowColor);
             newBlock->setGeometry(66+96*x, 266+96*y, 80, 80);
             newBlock->show();
+            numbers[x][y] = num;
             grids[x][y] = newBlock;
             break;
         }

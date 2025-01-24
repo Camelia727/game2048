@@ -40,6 +40,7 @@ private:
     int topScore;
     QMediaPlayer* player;
     QAudioOutput* audio;
+    QTimer* durationTimer;
     QColor backgroundColor;
     QColor mainbackColor;
     QColor mainbtnColor;
@@ -49,6 +50,8 @@ private:
     QColor backshadowColor;
     QColor mainshadowColor;
     QColor gridshadowColor;
+    QList<QUrl> bgms;
+    QList<QList<int>> numbers;
     QList<QList<NumBlock*>> grids;
 
     void moveGrid(int x1, int y1, int x2, int y2);
@@ -62,6 +65,8 @@ private:
     void gameEnd();
 
 public slots:
+    void playBgm();
+    void acceptMove();
 
 };
 #endif // WIDGET_H
