@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "../../../widget.h"
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #if __has_include(<QtCore/qtmochelpers.h>)
@@ -41,15 +42,19 @@ static constexpr auto qt_meta_stringdata_CLASSWidgetENDCLASS = QtMocHelpers::str
     "Widget",
     "playBgm",
     "",
+    "QMediaPlayer::MediaStatus",
+    "status",
     "acceptMove"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSWidgetENDCLASS_t {
-    uint offsetsAndSizes[8];
+    uint offsetsAndSizes[12];
     char stringdata0[7];
     char stringdata1[8];
     char stringdata2[1];
-    char stringdata3[11];
+    char stringdata3[26];
+    char stringdata4[7];
+    char stringdata5[11];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSWidgetENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -58,11 +63,15 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSWidgetENDCLASS_t qt_meta_string
         QT_MOC_LITERAL(0, 6),  // "Widget"
         QT_MOC_LITERAL(7, 7),  // "playBgm"
         QT_MOC_LITERAL(15, 0),  // ""
-        QT_MOC_LITERAL(16, 10)   // "acceptMove"
+        QT_MOC_LITERAL(16, 25),  // "QMediaPlayer::MediaStatus"
+        QT_MOC_LITERAL(42, 6),  // "status"
+        QT_MOC_LITERAL(49, 10)   // "acceptMove"
     },
     "Widget",
     "playBgm",
     "",
+    "QMediaPlayer::MediaStatus",
+    "status",
     "acceptMove"
 };
 #undef QT_MOC_LITERAL
@@ -83,11 +92,11 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSWidgetENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   26,    2, 0x0a,    1 /* Public */,
-       3,    0,   27,    2, 0x0a,    2 /* Public */,
+       1,    1,   26,    2, 0x0a,    1 /* Public */,
+       5,    0,   29,    2, 0x0a,    3 /* Public */,
 
  // slots: parameters
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
 
        0        // eod
@@ -104,6 +113,7 @@ Q_CONSTINIT const QMetaObject Widget::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<Widget, std::true_type>,
         // method 'playBgm'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<QMediaPlayer::MediaStatus, std::false_type>,
         // method 'acceptMove'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
@@ -116,12 +126,11 @@ void Widget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         auto *_t = static_cast<Widget *>(_o);
         (void)_t;
         switch (_id) {
-        case 0: _t->playBgm(); break;
+        case 0: _t->playBgm((*reinterpret_cast< std::add_pointer_t<QMediaPlayer::MediaStatus>>(_a[1]))); break;
         case 1: _t->acceptMove(); break;
         default: ;
         }
     }
-    (void)_a;
 }
 
 const QMetaObject *Widget::metaObject() const

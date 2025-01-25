@@ -10,6 +10,7 @@
 #include <QRandomGenerator>
 #include <QPropertyAnimation>
 #include "numblock.h"
+#include "qlabel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +39,8 @@ private:
     bool pausing;
     int curScore;
     int topScore;
+    QLabel* curscoreLabel;
+    QLabel* topscoreLabel;
     QMediaPlayer* player;
     QAudioOutput* audio;
     QTimer* durationTimer;
@@ -54,18 +57,25 @@ private:
     QList<QList<int>> numbers;
     QList<QList<NumBlock*>> grids;
 
-    void moveGrid(int x1, int y1, int x2, int y2);
     void moveUp();
     void moveDown();
     void moveRight();
     void moveLeft();
+    void moveGrid(int x1, int y1, int x2, int y2);
+    void moveAnimationX(QList<QList<QPoint>> moves);
+    void moveAnimationY(QList<QList<QPoint>> moves);
     void createGrid();
+    void updateCurScore(int score);
+    void updateTopScore();
     bool isEnd() const;
     void gamePause();
     void gameEnd();
+    void saveArchive();
+    void loadArchive();
+    void newGame();
 
 public slots:
-    void playBgm();
+    void playBgm(QMediaPlayer::MediaStatus status);
     void acceptMove();
 
 };
