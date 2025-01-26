@@ -54,6 +54,7 @@ private:
     QColor mainshadowColor;
     QColor gridshadowColor;
     QList<QUrl> bgms;
+    QList<QList<bool>> merge;
     QList<QList<int>> numbers;
     QList<QList<NumBlock*>> grids;
 
@@ -68,7 +69,8 @@ private:
     void updateCurScore(int score);
     void updateTopScore();
     bool isEnd() const;
-    void gamePause();
+    void gamePauseOn();
+    void gamePauseOff();
     void gameEnd();
     void saveArchive();
     void loadArchive();

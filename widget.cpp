@@ -70,8 +70,9 @@ void Widget::moveUp()
             if (numbers[x][y] != 0){
                 for (int y_ = y-1; y_ >= 0; y_--){
                     if (numbers[x][y_] != 0){
-                        if (numbers[x][y_] == numbers[x][y]) {
+                        if (numbers[x][y_] == numbers[x][y] && !merge[x][y_]) {
                             moveGrid(x, y, x, y_);
+                            merge[x][y_] = true;
                             move.append(QPoint(y, y_));
                             break;
                         }
@@ -108,8 +109,9 @@ void Widget::moveDown()
             if (numbers[x][y] != 0){
                 for (int y_ = y+1; y_ < 4; y_++){
                     if (numbers[x][y_] != 0){
-                        if (numbers[x][y_] == numbers[x][y]) {
+                        if (numbers[x][y_] == numbers[x][y] && !merge[x][y_]) {
                             moveGrid(x, y, x, y_);
+                            merge[x][y_] = true;
                             move.append(QPoint(y, y_));
                             break;
                         }
@@ -146,8 +148,9 @@ void Widget::moveRight()
             if (numbers[x][y] != 0){
                 for (int x_ = x+1; x_ < 4; x_++){
                     if (numbers[x_][y] != 0){
-                        if (numbers[x_][y] == numbers[x][y]) {
+                        if (numbers[x_][y] == numbers[x][y] && !merge[x_][y]) {
                             moveGrid(x, y, x_, y);
+                            merge[x_][y] = true;
                             move.append(QPoint(x, x_));
                             break;
                         }
@@ -184,8 +187,9 @@ void Widget::moveLeft()
             if (numbers[x][y] != 0){
                 for (int x_ = x-1; x_ >= 0; x_--){
                     if (numbers[x_][y] != 0){
-                        if (numbers[x_][y] == numbers[x][y]) {
+                        if (numbers[x_][y] == numbers[x][y] && !merge[x_][y]) {
                             moveGrid(x, y, x_, y);
+                            merge[x_][y] = true;
                             move.append(QPoint(x, x_));
                             break;
                         }
@@ -213,7 +217,12 @@ void Widget::moveLeft()
         moving = false;
 }
 
-void Widget::gamePause()
+void Widget::gamePauseOn()
+{
+
+}
+
+void Widget::gamePauseOff()
 {
 
 }
@@ -325,8 +334,14 @@ void Widget::keyPressEvent(QKeyEvent *event)
         moveRight();
         break;
     case Qt::Key_Escape:
-        pausing = true;
-        gamePause();
+        if (pausing){
+            pausing = false;
+            gamePauseOff();
+        }
+        else {
+            pausing = true;
+            gamePauseOn();
+        }
         break;
     default:
         break;
@@ -336,7 +351,6 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
 void Widget::moveGrid(int x1, int y1, int x2, int y2)
 {
-    qDebug() << "movegrid";
     if (numbers[x1][y1] == 0)
         return;
     if (x1 == x2 && y1 == y2)
@@ -353,7 +367,6 @@ void Widget::moveGrid(int x1, int y1, int x2, int y2)
 
 bool Widget::moveAnimationX(QList<QList<QPoint>> moves)
 {
-    qDebug() << "moveanimationx";
     bool haveMove = false;
     moving = true;
     for (int y = 0; y < 4; y++){
@@ -361,7 +374,6 @@ bool Widget::moveAnimationX(QList<QList<QPoint>> moves)
             int x = move.x(), x_ = move.y();
             if (x == x_)
                 continue;
-            qDebug() << "have move";
             haveMove = true;
             QPropertyAnimation* moveAnimation = new QPropertyAnimation(grids[x][y], "geometry", this);
             moveAnimation->setDuration(200);
@@ -375,10 +387,10 @@ bool Widget::moveAnimationX(QList<QList<QPoint>> moves)
             else if (grids[x][y]->getNum() == grids[x_][y]->getNum()) {
                 int num = grids[x][y]->getNum();
                 int score = 2*pow(2, num);
+                NumBlock* block = grids[x][y];
                 updateCurScore(score);
                 grids[x_][y]->setNum(num+1);
-                // QTimer::singleShot(200, this, [&](){grids[x][y]->hide();});
-                grids[x][y]->hide();
+                QTimer::singleShot(180, this, [=](){block->hide();});
                 grids[x][y] = nullptr;
             }
         }
@@ -388,7 +400,6 @@ bool Widget::moveAnimationX(QList<QList<QPoint>> moves)
 
 bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
 {
-    qDebug() << "moveanimationy";
     bool haveMove = false;
     moving = true;
     for (int x = 0; x < 4; x++){
@@ -396,7 +407,6 @@ bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
             int y = move.x(), y_ = move.y();
             if (y == y_)
                 continue;
-            qDebug() << "have move";
             haveMove = true;
             QPropertyAnimation* moveAnimation = new QPropertyAnimation(grids[x][y], "geometry", this);
             moveAnimation->setDuration(200);
@@ -410,9 +420,10 @@ bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
             else if (grids[x][y]->getNum() == grids[x][y_]->getNum()) {
                 int num = grids[x][y]->getNum();
                 int score = 2*pow(2, num);
+                NumBlock* block = grids[x][y];
                 updateCurScore(score);
                 grids[x][y_]->setNum(num+1);
-                grids[x][y]->hide();
+                QTimer::singleShot(180, this, [=](){block->hide();});
                 grids[x][y] = nullptr;
             }
         }
@@ -422,7 +433,6 @@ bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
 
 void Widget::createGrid()
 {
-    qDebug() << "gridCreate";
     while (true){
         int pos = QRandomGenerator::global()->bounded(16);
         int x = pos / 4;
@@ -440,6 +450,7 @@ void Widget::createGrid()
             break;
         }
     }
+    merge = QList<QList<bool>>(4, QList<bool>(4, false));
     for (int i = 0; i < 4; i++){
         QList<int> line;
         for (int j = 0; j < 4; j++){
