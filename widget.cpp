@@ -28,12 +28,12 @@ Widget::Widget(QWidget *parent)
     loadArchive();
     curscoreLabel->setGeometry(66, 116, 176, 118);
     topscoreLabel->setGeometry(258, 116, 176, 56);
-    curscoreLabel->setStyleSheet("color:white;font-size:40px;font-weight:bold;");
-    topscoreLabel->setStyleSheet("color:white;font-size:25px;font-weight:bold;");
+    curscoreLabel->setStyleSheet("color:white;font-size:50px;font-weight:bold;font-family:'Segoe UI Black';");
+    topscoreLabel->setStyleSheet("color:white;font-size:28px;font-weight:bold;font-family:'Segoe UI Black';");
     curscoreLabel->setAlignment(Qt::AlignCenter);
     topscoreLabel->setAlignment(Qt::AlignCenter);
     curscoreLabel->setText(QString::number(curScore));
-    topscoreLabel->setText(QString::number(topScore));
+    topscoreLabel->setText("Top：" + QString::number(topScore));
 
     bgms = {QUrl("qrc:/bgms/bgm/Alone.mp3"),
             QUrl("qrc:/bgms/bgm/April 11th.mp3"),
@@ -93,7 +93,10 @@ void Widget::moveUp()
         }
         moves.append(move);
     }
-    moveAnimationY(moves);
+    if (moveAnimationY(moves))
+        QTimer::singleShot(300, this, &Widget::createGrid);
+    else
+        moving = false;
 }
 
 void Widget::moveDown()
@@ -128,7 +131,10 @@ void Widget::moveDown()
         }
         moves.append(move);
     }
-    moveAnimationY(moves);
+    if (moveAnimationY(moves))
+        QTimer::singleShot(300, this, &Widget::createGrid);
+    else
+        moving = false;
 }
 
 void Widget::moveRight()
@@ -163,7 +169,10 @@ void Widget::moveRight()
         }
         moves.append(move);
     }
-    moveAnimationX(moves);
+    if (moveAnimationX(moves))
+        QTimer::singleShot(300, this, &Widget::createGrid);
+    else
+        moving = false;
 }
 
 void Widget::moveLeft()
@@ -198,7 +207,10 @@ void Widget::moveLeft()
         }
         moves.append(move);
     }
-    moveAnimationX(moves);
+    if (moveAnimationX(moves))
+        QTimer::singleShot(300, this, &Widget::createGrid);
+    else
+        moving = false;
 }
 
 void Widget::gamePause()
@@ -299,22 +311,18 @@ void Widget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Up:
         moving = true;
         moveUp();
-        QTimer::singleShot(300, this, &Widget::createGrid);
         break;
     case Qt::Key_Down:
         moving = true;
         moveDown();
-        QTimer::singleShot(300, this, &Widget::createGrid);
         break;
     case Qt::Key_Left:
         moving = true;
         moveLeft();
-        QTimer::singleShot(300, this, &Widget::createGrid);
         break;
     case Qt::Key_Right:
         moving = true;
         moveRight();
-        QTimer::singleShot(300, this, &Widget::createGrid);
         break;
     case Qt::Key_Escape:
         pausing = true;
@@ -343,15 +351,18 @@ void Widget::moveGrid(int x1, int y1, int x2, int y2)
     }
 }
 
-void Widget::moveAnimationX(QList<QList<QPoint> > moves)
+bool Widget::moveAnimationX(QList<QList<QPoint>> moves)
 {
     qDebug() << "moveanimationx";
+    bool haveMove = false;
     moving = true;
     for (int y = 0; y < 4; y++){
         for (QPoint move : moves[y]){
             int x = move.x(), x_ = move.y();
             if (x == x_)
                 continue;
+            qDebug() << "have move";
+            haveMove = true;
             QPropertyAnimation* moveAnimation = new QPropertyAnimation(grids[x][y], "geometry", this);
             moveAnimation->setDuration(200);
             moveAnimation->setStartValue(QRect(66+96*x, 266+96*y, 80, 80));
@@ -362,24 +373,31 @@ void Widget::moveAnimationX(QList<QList<QPoint> > moves)
                 grids[x][y] = nullptr;
             }
             else if (grids[x][y]->getNum() == grids[x_][y]->getNum()) {
-                grids[x_][y]->setNum(grids[x][y]->getNum()+1);
+                int num = grids[x][y]->getNum();
+                int score = 2*pow(2, num);
+                updateCurScore(score);
+                grids[x_][y]->setNum(num+1);
                 // QTimer::singleShot(200, this, [&](){grids[x][y]->hide();});
                 grids[x][y]->hide();
                 grids[x][y] = nullptr;
             }
         }
     }
+    return haveMove;
 }
 
-void Widget::moveAnimationY(QList<QList<QPoint> > moves)
+bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
 {
     qDebug() << "moveanimationy";
+    bool haveMove = false;
     moving = true;
     for (int x = 0; x < 4; x++){
         for (QPoint move : moves[x]){
             int y = move.x(), y_ = move.y();
             if (y == y_)
                 continue;
+            qDebug() << "have move";
+            haveMove = true;
             QPropertyAnimation* moveAnimation = new QPropertyAnimation(grids[x][y], "geometry", this);
             moveAnimation->setDuration(200);
             moveAnimation->setStartValue(QRect(66+96*x, 266+96*y, 80, 80));
@@ -390,12 +408,16 @@ void Widget::moveAnimationY(QList<QList<QPoint> > moves)
                 grids[x][y] = nullptr;
             }
             else if (grids[x][y]->getNum() == grids[x][y_]->getNum()) {
-                grids[x][y_]->setNum(grids[x][y]->getNum()+1);
+                int num = grids[x][y]->getNum();
+                int score = 2*pow(2, num);
+                updateCurScore(score);
+                grids[x][y_]->setNum(num+1);
                 grids[x][y]->hide();
                 grids[x][y] = nullptr;
             }
         }
     }
+    return haveMove;
 }
 
 void Widget::createGrid()
@@ -447,6 +469,7 @@ void Widget::createGrid()
 
 void Widget::updateCurScore(int score)
 {
+    qDebug() << "update curscore";
     if (score == 0){
         curScore = 0;
         curscoreLabel->setText("0");
@@ -454,15 +477,17 @@ void Widget::updateCurScore(int score)
     else{
         curScore += score;
         curscoreLabel->setText(QString::number(curScore));
+        updateTopScore();
     }
     update();
 }
 
 void Widget::updateTopScore()
 {
+    qDebug() << "update topscore";
     if (curScore > topScore){
         topScore = curScore;
-        topscoreLabel->setText(QString::number(topScore));
+        topscoreLabel->setText("Top：" + QString::number(topScore));
         update();
     }
 }

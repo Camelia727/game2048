@@ -24,6 +24,7 @@
    </property>
    <property name="font">
     <font>
+     <family>Segoe UI Black</family>
      <pointsize>25</pointsize>
      <bold>true</bold>
     </font>
@@ -46,6 +47,7 @@
    </property>
    <property name="font">
     <font>
+     <family>Segoe UI Black</family>
      <pointsize>25</pointsize>
      <bold>true</bold>
     </font>

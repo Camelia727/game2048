@@ -62,8 +62,8 @@ private:
     void moveRight();
     void moveLeft();
     void moveGrid(int x1, int y1, int x2, int y2);
-    void moveAnimationX(QList<QList<QPoint>> moves);
-    void moveAnimationY(QList<QList<QPoint>> moves);
+    bool moveAnimationX(QList<QList<QPoint>> moves);
+    bool moveAnimationY(QList<QList<QPoint>> moves);
     void createGrid();
     void updateCurScore(int score);
     void updateTopScore();

@@ -31,6 +31,7 @@ public:
         number->setObjectName("number");
         number->setGeometry(QRect(0, 0, 76, 76));
         QFont font;
+        font.setFamilies({QString::fromUtf8("Segoe UI Black")});
         font.setPointSize(25);
         font.setBold(true);
         number->setFont(font);
