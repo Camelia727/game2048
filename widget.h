@@ -14,7 +14,7 @@
 #include "button.h"
 #include "numblock.h"
 #include "qlabel.h"
-#include "menu.h"
+#include "volumnslider.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

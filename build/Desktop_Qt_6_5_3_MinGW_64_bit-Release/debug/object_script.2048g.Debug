@@ -1,12 +1,10 @@
 debug/button.o
 debug/main.o
-debug/menu.o
 debug/numblock.o
 debug/volumnslider.o
 debug/widget.o
 debug/qrc_media.o
 debug/moc_button.o
-debug/moc_menu.o
 debug/moc_numblock.o
 debug/moc_volumnslider.o
 debug/moc_widget.o
