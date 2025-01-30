@@ -70,6 +70,8 @@ private:
     QList<QList<bool>> merge;
     QList<QList<int>> numbers;
     QList<QList<NumBlock*>> grids;
+    QList<QList<int>> prenumbers;
+    QList<QList<NumBlock*>> pregrids;
 
     void moveUp();
     void moveDown();

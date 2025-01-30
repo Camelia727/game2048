@@ -68,7 +68,9 @@ Widget::Widget(QWidget *parent)
             QUrl("qrc:/bgms/bgm/Shelter.mp3")
     };
     grids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
+    pregrids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
     numbers = QList<QList<int>>(4, QList<int>(4, 0));
+    prenumbers = QList<QList<int>>(4, QList<int>(4, 0));
 
     int index = QRandomGenerator::global()->bounded(bgms.size());
     player->setSource(bgms[index]);
@@ -350,7 +352,29 @@ void Widget::acceptMove()
 
 void Widget::recall()
 {
-
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            if (grids[i][j])
+                grids[i][j]->hide();
+        }
+    }
+    grids = pregrids;
+    numbers = prenumbers;
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            if (numbers[i][j] != 0 && grids[i][j]){
+                grids[i][j]->show();
+                grids[i][j]->setNum(numbers[i][j]);
+                grids[i][j]->setGeometry(66+96*i, 266+96*j, 80, 80);
+            }
+            else {
+                if (grids[i][j] != nullptr){
+                    grids[i][j]->hide();
+                }
+            }
+        }
+    }
+    update();
 }
 
 void Widget::openMenu()
@@ -438,18 +462,26 @@ void Widget::keyPressEvent(QKeyEvent *event)
     switch (event->key()){
     case Qt::Key_Up:
         moving = true;
+        pregrids = grids;
+        prenumbers = numbers;
         moveUp();
         break;
     case Qt::Key_Down:
         moving = true;
+        pregrids = grids;
+        prenumbers = numbers;
         moveDown();
         break;
     case Qt::Key_Left:
         moving = true;
+        pregrids = grids;
+        prenumbers = numbers;
         moveLeft();
         break;
     case Qt::Key_Right:
         moving = true;
+        pregrids = grids;
+        prenumbers = numbers;
         moveRight();
         break;
     case Qt::Key_Escape:
@@ -559,7 +591,7 @@ void Widget::createGrid()
         if (grids[x][y] == nullptr) {
             qDebug() << "x:" << x << "y:" << y << "\n*****";
             int num = QRandomGenerator::global()->bounded(10) < 9 ? 1 : 2;
-            NumBlock* newBlock = new NumBlock(this);
+            NumBlock* newBlock = new NumBlock(/*this*/);
             newBlock->setNum(num);
             newBlock->setTheme(gridshadowColor);
             newBlock->setGeometry(66+96*x, 266+96*y, 80, 80);

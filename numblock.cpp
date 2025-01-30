@@ -30,6 +30,8 @@ NumBlock::~NumBlock()
 
 void NumBlock::setNum(const int n)
 {
+    if (num > 2 && num == n)
+        return;
     num = n;
     QString text = QString::number(pow(2, num));
     ui->number->setText(text);
