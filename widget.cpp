@@ -4,6 +4,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
+    , changed(false)
     , moving(false)
     , curScore(0)
     , topScore(0)
@@ -96,6 +97,7 @@ Widget::~Widget()
 
 void Widget::moveUp()
 {
+    changed = true;
     QList<QList<QPoint>> moves;
     for (int x = 0; x < 4; x++){
         QList<QPoint> move;
@@ -135,6 +137,7 @@ void Widget::moveUp()
 
 void Widget::moveDown()
 {
+    changed = true;
     QList<QList<QPoint>> moves;
     for (int x = 0; x < 4; x++){
         QList<QPoint> move;
@@ -174,6 +177,7 @@ void Widget::moveDown()
 
 void Widget::moveRight()
 {
+    changed = true;
     QList<QList<QPoint>> moves;
     for (int y = 0; y < 4; y++){
         QList<QPoint> move;
@@ -213,6 +217,7 @@ void Widget::moveRight()
 
 void Widget::moveLeft()
 {
+    changed = true;
     QList<QList<QPoint>> moves;
     for (int y = 0; y < 4; y++){
         QList<QPoint> move;
@@ -352,6 +357,8 @@ void Widget::acceptMove()
 
 void Widget::recall()
 {
+    if (!changed)
+        return;
     for (int i = 0; i < 4; i++){
         for (int j = 0; j < 4; j++){
             if (grids[i][j])
@@ -400,7 +407,8 @@ void Widget::closeMenu()
 
 void Widget::exit()
 {
-
+    saveArchive();
+    close();
 }
 
 void Widget::changeVolumn(int volumn)
@@ -433,17 +441,10 @@ void Widget::paintEvent(QPaintEvent *event)
     painter.setBrush(brush);
     painter.drawRect(50,250,400,400);
 
-    // brush.setColor(mainshadowColor);
-    // painter.setBrush(brush);
-    // painter.drawRect(263, 188, 73, 46);
-    // painter.drawRect(361, 188, 73, 46);
-
     brush.setColor(mainbtnColor);
     painter.setBrush(brush);
     painter.drawRect(66, 116, 176, 118);
     painter.drawRect(258, 116, 176, 56);
-    // painter.drawRect(258, 183, 73, 46);
-    // painter.drawRect(356, 183, 73, 46);
 
     brush.setColor(gridColor);
     painter.setBrush(brush);
@@ -462,26 +463,22 @@ void Widget::keyPressEvent(QKeyEvent *event)
     switch (event->key()){
     case Qt::Key_Up:
         moving = true;
-        pregrids = grids;
-        prenumbers = numbers;
+        updatePre();
         moveUp();
         break;
     case Qt::Key_Down:
         moving = true;
-        pregrids = grids;
-        prenumbers = numbers;
+        updatePre();
         moveDown();
         break;
     case Qt::Key_Left:
         moving = true;
-        pregrids = grids;
-        prenumbers = numbers;
+        updatePre();
         moveLeft();
         break;
     case Qt::Key_Right:
         moving = true;
-        pregrids = grids;
-        prenumbers = numbers;
+        updatePre();
         moveRight();
         break;
     case Qt::Key_Escape:
@@ -591,7 +588,7 @@ void Widget::createGrid()
         if (grids[x][y] == nullptr) {
             qDebug() << "x:" << x << "y:" << y << "\n*****";
             int num = QRandomGenerator::global()->bounded(10) < 9 ? 1 : 2;
-            NumBlock* newBlock = new NumBlock(/*this*/);
+            NumBlock* newBlock = new NumBlock(this);
             newBlock->setNum(num);
             newBlock->setTheme(gridshadowColor);
             newBlock->setGeometry(66+96*x, 266+96*y, 80, 80);
@@ -652,6 +649,31 @@ void Widget::updateTopScore()
         topscoreLabel->setText("Top：" + QString::number(topScore));
         update();
     }
+}
+
+void Widget::updatePre()
+{
+    QList<NumBlock*> pres;
+    QList<NumBlock*> curs;
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            if (grids[i][j] != nullptr){
+                curs.append(grids[i][j]);
+            }
+            if (pregrids[i][j] != nullptr){
+                pres.append(pregrids[i][j]);
+            }
+        }
+    }
+    for (NumBlock* grid : pres){
+        if (!curs.contains(grid)){
+            grid->setParent(nullptr);
+            delete grid;
+            grid = nullptr;
+        }
+    }
+    pregrids = grids;
+    prenumbers = numbers;
 }
 
 bool Widget::isEnd() const

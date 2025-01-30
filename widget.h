@@ -39,6 +39,7 @@ protected:
 private:
     Ui::Widget *ui;
 
+    bool changed;
     bool moving;
     bool menuOpen;
     int curScore;
@@ -83,6 +84,7 @@ private:
     void createGrid();
     void updateCurScore(int score);
     void updateTopScore();
+    void updatePre();
     bool isEnd() const;
     void gamePauseOn();
     void gamePauseOff();
