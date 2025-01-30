@@ -1,0 +1,12 @@
+release/button.o
+release/main.o
+release/menu.o
+release/numblock.o
+release/volumnslider.o
+release/widget.o
+release/qrc_media.o
+release/moc_button.o
+release/moc_menu.o
+release/moc_numblock.o
+release/moc_volumnslider.o
+release/moc_widget.o

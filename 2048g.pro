@@ -13,15 +13,20 @@ CONFIG += c++17
 SOURCES += \
     button.cpp \
     main.cpp \
+    menu.cpp \
     numblock.cpp \
+    volumnslider.cpp \
     widget.cpp
 
 HEADERS += \
     button.h \
+    menu.h \
     numblock.h \
+    volumnslider.h \
     widget.h
 
 FORMS += \
+    menu.ui \
     numblock.ui \
     widget.ui
 

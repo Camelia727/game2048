@@ -2,6 +2,8 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QDir>
+#include <QFile>
 #include <QTimer>
 #include <QPainter>
 #include <QKeyEvent>
@@ -9,8 +11,10 @@
 #include <QAudioOutput>
 #include <QRandomGenerator>
 #include <QPropertyAnimation>
+#include "button.h"
 #include "numblock.h"
 #include "qlabel.h"
+#include "menu.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,7 +40,7 @@ private:
     Ui::Widget *ui;
 
     bool moving;
-    bool pausing;
+    bool menuOpen;
     int curScore;
     int topScore;
     QLabel* curscoreLabel;
@@ -53,6 +57,15 @@ private:
     QColor backshadowColor;
     QColor mainshadowColor;
     QColor gridshadowColor;
+    QWidget* menu;
+    Button* recallBtn;
+    Button* menuBtn;
+    Button* themeBtn;
+    Button* resetBtn;
+    Button* returnBtn;
+    Button* exitBtn;
+    VolumnSlider* volumnSlider;
+
     QList<QUrl> bgms;
     QList<QList<bool>> merge;
     QList<QList<int>> numbers;
@@ -79,6 +92,13 @@ private:
 public slots:
     void playBgm(QMediaPlayer::MediaStatus status);
     void acceptMove();
+    void recall();
+    void openMenu();
+    void changeTheme();
+    void reset();
+    void closeMenu();
+    void exit();
+    void changeVolumn(int volumn);
 
 };
 #endif // WIDGET_H

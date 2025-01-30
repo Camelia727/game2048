@@ -15,6 +15,8 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
     setFixedSize(500,750);
+    setWindowTitle("2048!!!!!");
+    setWindowIcon(QIcon(":/pics/pics/icon.png"));
     backgroundColor.setRgb(0, 153, 153);
     mainbackColor.setRgb(51, 204, 204);
     mainbtnColor.setRgb(92, 213, 222);
@@ -35,6 +37,28 @@ Widget::Widget(QWidget *parent)
     curscoreLabel->setText(QString::number(curScore));
     topscoreLabel->setText("Top：" + QString::number(topScore));
 
+    menu = new QWidget(this);
+    menu->setFixedSize(400, 150);
+    menu->setGeometry(50, 100, 400, 150);
+    menu->setStyleSheet(QString("background-color:%1").arg(mainbackColor.name()));
+    menu->hide();
+
+    recallBtn = new Button("撤回", this);
+    menuBtn = new Button("菜单", this);
+    themeBtn = new Button("主题", menu);
+    resetBtn = new Button("重置", menu);
+    returnBtn = new Button("返回", menu);
+    exitBtn = new Button("退出", menu);
+    volumnSlider = new VolumnSlider(menu);
+
+    recallBtn->setGeometry(258, 183, 78, 51);
+    menuBtn->setGeometry(356, 183, 78, 51);
+    themeBtn->setGeometry(17, 83, 78, 51);
+    resetBtn->setGeometry(113, 83, 78, 51);
+    returnBtn->setGeometry(209, 83, 78, 51);
+    exitBtn->setGeometry(305, 83, 78, 51);
+    volumnSlider->setGeometry(16, 16, 400, 50);
+
     bgms = {QUrl("qrc:/bgms/bgm/Alone.mp3"),
             QUrl("qrc:/bgms/bgm/April 11th.mp3"),
             QUrl("qrc:/bgms/bgm/autumn.mp3"),
@@ -49,10 +73,17 @@ Widget::Widget(QWidget *parent)
     int index = QRandomGenerator::global()->bounded(bgms.size());
     player->setSource(bgms[index]);
     player->setAudioOutput(audio);
-    audio->setVolume(30);
+    audio->setVolume(1);
     player->play();
     connect(player, &QMediaPlayer::mediaStatusChanged, this, &Widget::playBgm);
     connect(durationTimer, &QTimer::timeout, this, &Widget::acceptMove);
+    connect(recallBtn, &Button::clicked, this, &Widget::recall);
+    connect(menuBtn, &Button::clicked, this, &Widget::openMenu);
+    connect(themeBtn, &Button::clicked, this, &Widget::changeTheme);
+    connect(resetBtn, &Button::clicked, this, &Widget::reset);
+    connect(returnBtn, &Button::clicked, this, &Widget::closeMenu);
+    connect(exitBtn, &Button::clicked, this, &Widget::exit);
+    connect(volumnSlider, &VolumnSlider::valueChanged, this, &Widget::changeVolumn);
     createGrid();
 }
 
@@ -234,12 +265,62 @@ void Widget::gameEnd()
 
 void Widget::saveArchive()
 {
+    QDir currentDir = QDir::current();
+    // 构建文件名
+    QString fileName = currentDir.filePath("historyfile.txt");
 
+    // 创建QFile对象
+    QFile file(fileName);
+
+    // 检查文件是否存在
+    if (!file.exists()) {
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qWarning() << "Could not open file for writing:" << file.errorString();
+            return;
+        }
+        QTextStream out(&file);
+        // TO DO
+    } else {
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            qWarning() << "Could not open file for writing:" << file.errorString();
+            return;
+        }
+        QTextStream out(&file);
+
+    }
+
+    // 关闭文件
+    file.close();
 }
 
 void Widget::loadArchive()
 {
+    // 获取当前工作目录
+    QDir currentDir = QDir::current();
+    // 构建文件名
+    QString fileName = currentDir.filePath("historyfile.txt");
 
+
+    // 创建QFile对象并打开文件
+    QFile file(fileName);
+    if (!file.exists()){
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // 如果文件打开失败，打印错误信息
+        qDebug() << "Cannot open file:" << fileName << "Error:" << file.errorString();
+        return;
+    }
+
+    // 创建QTextStream对象，与QFile对象关联
+    QTextStream in(&file);
+
+    // TO DO
+
+
+    // 关闭文件
+    file.close();
 }
 
 void Widget::newGame()
@@ -267,6 +348,44 @@ void Widget::acceptMove()
 
 }
 
+void Widget::recall()
+{
+
+}
+
+void Widget::openMenu()
+{
+    menu->show();
+    menu->raise();
+}
+
+void Widget::changeTheme()
+{
+
+}
+
+void Widget::reset()
+{
+
+}
+
+void Widget::closeMenu()
+{
+    menu->hide();
+}
+
+void Widget::exit()
+{
+
+}
+
+void Widget::changeVolumn(int volumn)
+{
+    double v = static_cast<double>(volumn) / 100.0;
+    qDebug() << v;
+    audio->setVolume(v);
+}
+
 
 
 void Widget::paintEvent(QPaintEvent *event)
@@ -290,17 +409,17 @@ void Widget::paintEvent(QPaintEvent *event)
     painter.setBrush(brush);
     painter.drawRect(50,250,400,400);
 
-    brush.setColor(mainshadowColor);
-    painter.setBrush(brush);
-    painter.drawRect(263, 188, 73, 46);
-    painter.drawRect(361, 188, 73, 46);
+    // brush.setColor(mainshadowColor);
+    // painter.setBrush(brush);
+    // painter.drawRect(263, 188, 73, 46);
+    // painter.drawRect(361, 188, 73, 46);
 
     brush.setColor(mainbtnColor);
     painter.setBrush(brush);
     painter.drawRect(66, 116, 176, 118);
     painter.drawRect(258, 116, 176, 56);
-    painter.drawRect(258, 183, 73, 46);
-    painter.drawRect(356, 183, 73, 46);
+    // painter.drawRect(258, 183, 73, 46);
+    // painter.drawRect(356, 183, 73, 46);
 
     brush.setColor(gridColor);
     painter.setBrush(brush);
@@ -312,7 +431,7 @@ void Widget::paintEvent(QPaintEvent *event)
 
 void Widget::keyPressEvent(QKeyEvent *event)
 {
-    if (moving || pausing){
+    if (moving){
         event->ignore();
         return;
     }
@@ -334,13 +453,13 @@ void Widget::keyPressEvent(QKeyEvent *event)
         moveRight();
         break;
     case Qt::Key_Escape:
-        if (pausing){
-            pausing = false;
-            gamePauseOff();
+        if (menuOpen){
+            menuOpen = false;
+            openMenu();
         }
         else {
-            pausing = true;
-            gamePauseOn();
+            menuOpen = true;
+            closeMenu();
         }
         break;
     default:

@@ -1,18 +1,23 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
+#include "qlabel.h"
 #include <QWidget>
+#include <QPainter>
 
 class Button : public QWidget
 {
     Q_OBJECT
 protected:
-    QSize size;
-    QRect rect;
-    QPixmap pic;
+    QString text;
+    QLabel* title;
+    QColor buttonColor;
+    QColor originColor;
+    QColor enterColor;
+    QColor pressColor;
     QColor shadowColor;
 public:
-    explicit Button(QWidget *parent = nullptr);
+    explicit Button(QString str, QWidget *parent = nullptr);
 
 protected:
     void enterEvent(QEnterEvent* event) override;
