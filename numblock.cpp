@@ -8,7 +8,7 @@ NumBlock::NumBlock(QWidget *parent)
     , theme(0)
 {
     ui->setupUi(this);
-    setFixedSize(80, 80);
+    setBaseSize(80, 80);
     colors = {QColor(115,255,255), QColor(153,229,255),
         QColor(77,210,255), QColor(0,191,255),
         QColor(115,185,255), QColor(38,147,255),

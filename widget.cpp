@@ -88,6 +88,7 @@ Widget::Widget(QWidget *parent)
     connect(exitBtn, &Button::clicked, this, &Widget::exit);
     connect(volumnSlider, &VolumnSlider::valueChanged, this, &Widget::changeVolumn);
     createGrid();
+    createGrid();
 }
 
 Widget::~Widget()
@@ -268,6 +269,7 @@ void Widget::gamePauseOff()
 void Widget::gameEnd()
 {
     qDebug() << "gameEnd";
+    saveArchive();
 }
 
 void Widget::saveArchive()
@@ -397,7 +399,20 @@ void Widget::changeTheme()
 
 void Widget::reset()
 {
-
+    for (NumBlock* grid : allgrids){
+        grid->hide();
+        grid->setParent(nullptr);
+        delete grid;
+        grid = nullptr;
+    }
+    updateCurScore(0);
+    changed = false;
+    allgrids.clear();
+    grids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
+    pregrids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
+    numbers = QList<QList<int>>(4, QList<int>(4, 0));
+    prenumbers = QList<QList<int>>(4, QList<int>(4, 0));
+    createGrid();
 }
 
 void Widget::closeMenu()
@@ -593,8 +608,14 @@ void Widget::createGrid()
             newBlock->setTheme(gridshadowColor);
             newBlock->setGeometry(66+96*x, 266+96*y, 80, 80);
             newBlock->show();
+            QPropertyAnimation* createAnimation = new QPropertyAnimation(newBlock, "geometry", this);
+            createAnimation->setDuration(80);
+            createAnimation->setStartValue(QRect(81+96*x, 281+96*y, 50, 50));
+            createAnimation->setEndValue(QRect(66+96*x, 266+96*y, 80, 80));
+            createAnimation->start();
             numbers[x][y] = num;
             grids[x][y] = newBlock;
+            allgrids.append(newBlock);
             break;
         }
     }
@@ -628,7 +649,6 @@ void Widget::createGrid()
 
 void Widget::updateCurScore(int score)
 {
-    qDebug() << "update curscore";
     if (score == 0){
         curScore = 0;
         curscoreLabel->setText("0");
@@ -643,7 +663,6 @@ void Widget::updateCurScore(int score)
 
 void Widget::updateTopScore()
 {
-    qDebug() << "update topscore";
     if (curScore > topScore){
         topScore = curScore;
         topscoreLabel->setText("Top：" + QString::number(topScore));
@@ -668,6 +687,7 @@ void Widget::updatePre()
     for (NumBlock* grid : pres){
         if (!curs.contains(grid)){
             grid->setParent(nullptr);
+            allgrids.removeAll(grid);
             delete grid;
             grid = nullptr;
         }
@@ -678,5 +698,19 @@ void Widget::updatePre()
 
 bool Widget::isEnd() const
 {
-    return false;
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            if (i < 3){
+                if (numbers[i][j] == numbers[i+1][j]){
+                    return false;
+                }
+            }
+            if (j < 3){
+                if (numbers[i][j] == numbers[i][j+1]){
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }

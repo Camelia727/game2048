@@ -68,6 +68,7 @@ private:
     VolumnSlider* volumnSlider;
 
     QList<QUrl> bgms;
+    QList<NumBlock*> allgrids;
     QList<QList<bool>> merge;
     QList<QList<int>> numbers;
     QList<QList<NumBlock*>> grids;
