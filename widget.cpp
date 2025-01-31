@@ -6,8 +6,10 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
     , changed(false)
     , moving(false)
+    , isend(false)
     , curScore(0)
     , topScore(0)
+    , preScore(0)
     , curscoreLabel(new QLabel(this))
     , topscoreLabel(new QLabel(this))
     , player(new QMediaPlayer(this))
@@ -28,7 +30,6 @@ Widget::Widget(QWidget *parent)
     mainshadowColor.setRgb(10, 171, 182);
     gridshadowColor.setRgb(5, 132, 137);
     durationTimer->setInterval(200);
-    loadArchive();
     curscoreLabel->setGeometry(66, 116, 176, 118);
     topscoreLabel->setGeometry(258, 116, 176, 56);
     curscoreLabel->setStyleSheet("color:white;font-size:50px;font-weight:bold;font-family:'Segoe UI Black';");
@@ -60,6 +61,11 @@ Widget::Widget(QWidget *parent)
     exitBtn->setGeometry(305, 83, 78, 51);
     volumnSlider->setGeometry(16, 16, 400, 50);
 
+    gameendWidget = new QWidget(this);
+    gameendWidget->setStyleSheet("background-color:rgba(187, 187, 187, 180);");
+    gameendWidget->setGeometry(50, 250, 400, 400);
+    gameendWidget->hide();
+
     bgms = {QUrl("qrc:/bgms/bgm/Alone.mp3"),
             QUrl("qrc:/bgms/bgm/April 11th.mp3"),
             QUrl("qrc:/bgms/bgm/autumn.mp3"),
@@ -68,6 +74,7 @@ Widget::Widget(QWidget *parent)
             QUrl("qrc:/bgms/bgm/Savage Love.mp3"),
             QUrl("qrc:/bgms/bgm/Shelter.mp3")
     };
+    merge = QList<QList<bool>>(4, QList<bool>(4, false));
     grids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
     pregrids = QList<QList<NumBlock*>>(4, QList<NumBlock*>(4, nullptr));
     numbers = QList<QList<int>>(4, QList<int>(4, 0));
@@ -87,8 +94,13 @@ Widget::Widget(QWidget *parent)
     connect(returnBtn, &Button::clicked, this, &Widget::closeMenu);
     connect(exitBtn, &Button::clicked, this, &Widget::exit);
     connect(volumnSlider, &VolumnSlider::valueChanged, this, &Widget::changeVolumn);
-    createGrid();
-    createGrid();
+    if (!loadArchive()){
+        createGrid();
+        createGrid();
+    }
+    else
+        qDebug() << "loadArchive";
+    // createGrid();
 }
 
 Widget::~Widget()
@@ -269,7 +281,9 @@ void Widget::gamePauseOff()
 void Widget::gameEnd()
 {
     qDebug() << "gameEnd";
-    saveArchive();
+    isend = true;
+    gameendWidget->show();
+    gameendWidget->raise();
 }
 
 void Widget::saveArchive()
@@ -288,21 +302,55 @@ void Widget::saveArchive()
             return;
         }
         QTextStream out(&file);
-        // TO DO
+        if (isend){
+            out << 0 << " " << topScore << "\n";
+            for (int i = 0; i < 4; i++){
+                for (int j = 0; j < 4; j++){
+                    out << 0 << " ";
+                }
+                out << "\n";
+            }
+        }
+        else{
+            out << curScore << " " << topScore << "\n";
+            for (int i = 0; i < 4; i++){
+                for (int j = 0; j < 4; j++){
+                    out << numbers[i][j] << " ";
+                }
+                out << "\n";
+            }
+        }
     } else {
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
             qWarning() << "Could not open file for writing:" << file.errorString();
             return;
         }
         QTextStream out(&file);
-
+        if (isend){
+            out << 0 << " " << topScore << "\n";
+            for (int i = 0; i < 4; i++){
+                for (int j = 0; j < 4; j++){
+                    out << 0 << " ";
+                }
+                out << "\n";
+            }
+        }
+        else{
+            out << curScore << " " << topScore << "\n";
+            for (int i = 0; i < 4; i++){
+                for (int j = 0; j < 4; j++){
+                    out << numbers[i][j] << " ";
+                }
+                out << "\n";
+            }
+        }
     }
 
     // 关闭文件
     file.close();
 }
 
-void Widget::loadArchive()
+bool Widget::loadArchive()
 {
     // 获取当前工作目录
     QDir currentDir = QDir::current();
@@ -313,29 +361,91 @@ void Widget::loadArchive()
     // 创建QFile对象并打开文件
     QFile file(fileName);
     if (!file.exists()){
-        return;
+        return false;
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         // 如果文件打开失败，打印错误信息
         qDebug() << "Cannot open file:" << fileName << "Error:" << file.errorString();
-        return;
+        return false;
     }
 
     // 创建QTextStream对象，与QFile对象关联
     QTextStream in(&file);
 
     // TO DO
-
-
+    QString firstLine = in.readLine().trimmed();
+    QStringList firstLineNumbers = firstLine.split(' ', Qt::SkipEmptyParts);
+    if (firstLineNumbers.size() != 2) {
+        qDebug() << "Invalid number of values in the first line.";
+        file.close();
+        return false;
+    }
+    bool ok;
+    int num1 = firstLineNumbers[0].toInt(&ok);
+    int num2 = firstLineNumbers[1].toInt(&ok);
+    if (!ok) {
+        qDebug() << "Invalid numbers in the first line.";
+        file.close();
+        return false;
+    }
+    updateCurScore(num1);
+    updateTopScore(num2);
+    preScore = curScore;
+    for (int i = 0; i < 4; i++){
+        QString Line = in.readLine().trimmed();
+        QStringList LineNumbers = Line.split(' ', Qt::SkipEmptyParts);
+        if (LineNumbers.size() != 4) {
+            qDebug() << "Invalid number of values in the line.";
+            file.close();
+            return false;
+        }
+        int nums[4];
+        for (int j = 0; j < 4; ++j) {
+            nums[j] = LineNumbers[j].toInt(&ok);
+            if (!ok) {
+                qDebug() << "Invalid numbers in the line.";
+                file.close();
+                return false;
+            }
+        }
+        for (int j = 0; j < 4; j++)
+            numbers[i][j] = nums[j];
+    }
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            if (numbers[i][j] != 0){
+                if (grids[i][j]){
+                    grids[i][j]->setParent(nullptr);
+                    delete grids[i][j];
+                    grids[i][j] = nullptr;
+                    grids[i][j]->setNum(numbers[i][j]);
+                }
+                else{
+                    grids[i][j] = new NumBlock(this);
+                    grids[i][j]->setNum(numbers[i][j]);
+                }
+                grids[i][j]->setTheme(gridshadowColor);
+                grids[i][j]->setGeometry(66+96*i, 266+96*j, 80, 80);
+                grids[i][j]->show();
+                QPropertyAnimation* createAnimation = new QPropertyAnimation(grids[i][j], "geometry", this);
+                createAnimation->setDuration(80);
+                createAnimation->setStartValue(QRect(81+96*i, 281+96*j, 50, 50));
+                createAnimation->setEndValue(QRect(66+96*i, 266+96*j, 80, 80));
+                createAnimation->start();
+                allgrids.append(grids[i][j]);
+            }
+        }
+    }
     // 关闭文件
     file.close();
+    return true;
 }
 
 void Widget::newGame()
 {
     saveArchive();
-    updateTopScore();
+    updateTopScore(0);
     updateCurScore(0);
 }
 
@@ -367,6 +477,8 @@ void Widget::recall()
                 grids[i][j]->hide();
         }
     }
+    updateCurScore(0);
+    updateCurScore(preScore);
     grids = pregrids;
     numbers = prenumbers;
     for (int i = 0; i < 4; i++){
@@ -382,6 +494,10 @@ void Widget::recall()
                 }
             }
         }
+    }
+    if (isend){
+        isend = false;
+        gameendWidget->hide();
     }
     update();
 }
@@ -422,7 +538,6 @@ void Widget::closeMenu()
 
 void Widget::exit()
 {
-    saveArchive();
     close();
 }
 
@@ -432,8 +547,6 @@ void Widget::changeVolumn(int volumn)
     qDebug() << v;
     audio->setVolume(v);
 }
-
-
 
 void Widget::paintEvent(QPaintEvent *event)
 {
@@ -471,7 +584,7 @@ void Widget::paintEvent(QPaintEvent *event)
 
 void Widget::keyPressEvent(QKeyEvent *event)
 {
-    if (moving){
+    if (moving || isend){
         event->ignore();
         return;
     }
@@ -510,6 +623,12 @@ void Widget::keyPressEvent(QKeyEvent *event)
         break;
     }
     update();
+}
+
+void Widget::closeEvent(QCloseEvent *event)
+{
+    saveArchive();
+    event->accept();
 }
 
 void Widget::moveGrid(int x1, int y1, int x2, int y2)
@@ -591,6 +710,7 @@ bool Widget::moveAnimationY(QList<QList<QPoint>> moves)
             }
         }
     }
+    qDebug() << "moveanimatino:3";
     return haveMove;
 }
 
@@ -656,15 +776,15 @@ void Widget::updateCurScore(int score)
     else{
         curScore += score;
         curscoreLabel->setText(QString::number(curScore));
-        updateTopScore();
+        updateTopScore(curScore);
     }
     update();
 }
 
-void Widget::updateTopScore()
+void Widget::updateTopScore(int score)
 {
-    if (curScore > topScore){
-        topScore = curScore;
+    if (curScore > topScore || score > topScore){
+        topScore = std::max(curScore, score);
         topscoreLabel->setText("Top：" + QString::number(topScore));
         update();
     }
@@ -694,6 +814,7 @@ void Widget::updatePre()
     }
     pregrids = grids;
     prenumbers = numbers;
+    preScore = curScore;
 }
 
 bool Widget::isEnd() const

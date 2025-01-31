@@ -35,6 +35,7 @@ public:
 protected:
     void paintEvent(QPaintEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     Ui::Widget *ui;
@@ -42,8 +43,10 @@ private:
     bool changed;
     bool moving;
     bool menuOpen;
+    bool isend;
     int curScore;
     int topScore;
+    int preScore;
     QLabel* curscoreLabel;
     QLabel* topscoreLabel;
     QMediaPlayer* player;
@@ -59,6 +62,7 @@ private:
     QColor mainshadowColor;
     QColor gridshadowColor;
     QWidget* menu;
+    QWidget* gameendWidget;
     Button* recallBtn;
     Button* menuBtn;
     Button* themeBtn;
@@ -84,14 +88,14 @@ private:
     bool moveAnimationY(QList<QList<QPoint>> moves);
     void createGrid();
     void updateCurScore(int score);
-    void updateTopScore();
+    void updateTopScore(int score);
     void updatePre();
     bool isEnd() const;
     void gamePauseOn();
     void gamePauseOff();
     void gameEnd();
     void saveArchive();
-    void loadArchive();
+    bool loadArchive();
     void newGame();
 
 public slots:
